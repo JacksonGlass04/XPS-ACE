@@ -13,13 +13,13 @@
 ##
 
 #### SELECT DATA TO BE ANALYZED
->>> EdgarEastSpectrum.csv
+>>> Filename.csv
 
 #### ELEMENTS TO ANALYZE / PEAK CENTERS
 ## Write in a comma separated list alternating element name and peak center (eV), i.e. 'Fe, 712.5, Mg, 91, O, 535'
 ## You do not need to specify the atomic transition (e.g. you can write O instead of O1s)
 ## Write your list of elements and peak centers on the following line:
->>> C, 286.5, O, 533, F, 688, Na, 57.5, Mg, 90.5, Al, 76, Si, 155, P, 135.5, S, 171.5, Cl, 200.5, Cr, 580.5, Fe, 712.5
+>>> Fe, 712.5
 
 
 #### HOW TO OUTPUT PLOTS OF REGION FOR BACKGROUND POINT SELECTION
@@ -41,7 +41,7 @@
 ## You can obtain the CRSF values in multipak through the summary.txt table output
 ## Write CRSF values in the following format 'x, y, z'
 ## Where x, y, z and the CRSF values corresponding to the 1st, 2nd, and 3rd element listed above in the elements list
->>> 87.775, 205.026, 279.795, 50.283, 76.549, 84.135, 96.962, 168.940, 228.568, 301.547, 495.706, 598.542 
+>>> 598.542
 
 
 #### HOW TO RUN ERROR ANALYSIS
