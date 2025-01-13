@@ -1,5 +1,5 @@
 #________________________________________________________________________________________________
-#   PROGRAM NAME:  Area.py
+#   PROGRAM NAME:  Composition.py
 #   PURPOSE:       Calculate Atomic % and Area Under Curve of XPS Data
 #   CREATED:       Jackson Glass 2024
 #
@@ -17,6 +17,7 @@ import pandas as pd
 import Control
 import Background
 import os
+import sys
 
 #------------------------------------------------------------------------------------------------
 #               GLOBAL CONSTANTS TAKEN FROM Control.py
@@ -24,7 +25,8 @@ import os
 
 filename = Control.Return_Filename()
 
-df = pd.read_csv(filename, skiprows=4, header=None)
+# df = pd.read_csv(filename, skiprows=4, header=None)
+df = pd.read_csv(os.path.join(sys.path[0], filename), skiprows=4, header=None)
 df = df.apply(pd.to_numeric, errors='coerce')
 df = df.to_numpy()
 df = df.T
@@ -64,8 +66,6 @@ def Import_Region_Data(pk):
 
 L_Reg, R_Reg = Import_Region_Data(0)
 
-print(L_Reg)
-
 #------------------------------------------------------------------------------------------------
 #               LOOK OVER ALL POSSIBLE ENDPOINTS
 #------------------------------------------------------------------------------------------------
@@ -76,13 +76,17 @@ def Calc_Area_Array(pk,low_reg,high_reg):
     AUC_array = np.zeros(len(high_reg)*len(low_reg)) #### THESE MAY NEED TO BE FLIPPED, CHECK LATER
     for Emin in low_reg:
         for Emax in high_reg:
-            j = 0
-            BG = 0
+            # j = 0
+            # BG = 0
 
-            Curve = j - BG
+            # Curve = j - BG
 
-            AUC = np.trapz(Curve,np.flip(df[Index(Emax):Index(Emin)+1,0]),dx=BEstep)
-            print(Emin,Emax)
+            # AUC = np.trapz(Curve,np.flip(df[Index(Emax):Index(Emin)+1,0]),dx=BEstep)
+            # print(Emin,Emax)
+
+            upperBEdist = Emax - peak_centers[pk]
+            lowerBEdist = peak_centers[pk] - Emin
+            AUC = Background.area_btwn_spect(pk, upperBEdist, lowerBEdist)
 
             AUC_array[m] = AUC
             m += 1
@@ -162,6 +166,7 @@ def CalculateErrorBars():
 
     ## Import CRSF
     CRSF = Control.Return_CRSF()
+    CRSF = np.array(CRSF,dtype=float)
 
     MaxComposition = np.zeros(len(elements))
     MinComposition = np.zeros(len(elements))
@@ -170,7 +175,7 @@ def CalculateErrorBars():
     for i in range(len(elements)):
         #### Compute maximum %
         ## Find max AUC for element i
-        Element_Max_AUC = Extrema_df.iloc[i,2] / CRSF[i]
+        Element_Max_AUC = Extrema_df.iloc[i,2] * (1/CRSF[i])
         # print(Element_Max_AUC)
 
         ## Find min AUC for all other elements
@@ -195,6 +200,10 @@ def CalculateErrorBars():
         Normalization = Element_Min_AUC + np.sum(Other_Elements_Max)
         MinComposition[i] = Element_Min_AUC / Normalization
 
+    # Save results to a csv file
+    ACE_df = pd.DataFrame({'Element':elements,'Min':MinComposition, 'Max':MaxComposition})
+    ACE_df.to_csv('ACE.csv',index=False)
+
     return MaxComposition, MinComposition
 
 #------------------------------------------------------------------------------------------------
@@ -203,7 +212,7 @@ def CalculateErrorBars():
 
 def Main():
 
-    CalculateErrorBars()
+    print(CalculateErrorBars())
 
 Main()
 

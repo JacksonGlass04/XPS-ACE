@@ -16,12 +16,15 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from scipy.signal import savgol_filter
 from scipy.signal import argrelmin, argrelmax
+import os 
+import sys
 
 #------------------------------------------------------------------------------------------------
 #               READ IN CONFIG TEXT FILE
 #------------------------------------------------------------------------------------------------
 
-f = open("xpsConfig.txt", "r")
+# f = open("./xpsConfig.txt", "r")
+f = open(os.path.join(sys.path[0], "xpsConfig.txt"), "r")
 lines = f.readlines()
 data_lines = []
 

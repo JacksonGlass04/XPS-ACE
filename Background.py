@@ -7,22 +7,29 @@
 #   UNIVERSITY OF VIRGINIA
 #________________________________________________________________________________________________
 
+
+#------------------------------------------------------------------------------------------------
+#               IMPORT STATEMENTS
+#------------------------------------------------------------------------------------------------
+
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from scipy.signal import savgol_filter
 from scipy.signal import argrelmin, argrelmax
+from scipy.integrate import simpson
 import Control
 import os
+
+#------------------------------------------------------------------------------------------------
+#               GLOBAL CONSTANTS TAKEN FROM Control.py
+#------------------------------------------------------------------------------------------------
 
 filename = Control.Return_Filename()
 
 df = pd.read_csv(filename,skiprows=4,header=None)
 df = df.apply(pd.to_numeric, errors='coerce')
 df = df.to_numpy()
-# df = df.T
-# df[0] = np.flip(df[0])
-# df[1] = np.flip(df[1])
 
 # Max value
 maxBE = max(df[0])
@@ -41,57 +48,97 @@ def Index(val):
 peak_centers = Control.Return_Peak_Centers()
 elements = Control.Return_Elements()
 
-def ShirleyBG(df, Emin,Emax):
+#------------------------------------------------------------------------------------------------
+#               FUNCTIONS TO CALC k_n and B_n(E)
+#------------------------------------------------------------------------------------------------
 
-    ### Subset the spectrum between Emin and Emax
-        ### With how we are reading in the data, j[0] occurs at Emax, j[-1] occurs at Emin
+# Func to calculate new k value
+def calc_kn(j_min, j_max, j, B):
+    diff = (j_min - j_max)
+    area = simpson((j - B),dx=0.5)
+    return (diff / area)
 
-    j = np.copy(df[Index(Emax):Index(Emin)+1,1])
+# Func to get new background
+def calc_bg(kn, j, E0, bg_in):
+    # Filling Bn(E) array via loop
+    bg_out = np.zeros(len(bg_in))
+    E_max = E0[0]
 
-    ### Point Averaging, take j[0] and j[-1] and 
-    num_avg_adj = 2
-    j[0] = np.average(df[Index(Emax)-num_avg_adj:Index(Emax)+num_avg_adj+1,1])
-    j[-1] = np.average(df[Index(Emin)-num_avg_adj:Index(Emin)+num_avg_adj+1,1])
+    j_max = j[0]
+    j_min = j[-1]
 
-    ### If the intensity at the minimum binding energy is greater than the intensity at the maximum, a straight line is returned
-    if df[Index(Emax),1] < df[Index(Emin),1]:
-        ## Calculate slope
-        # slope = np.abs(df[Index(Emin),1] - df[Index(Emax),1]) / np.abs(df[Index(Emin),0] - df[Index(Emax),0])
-        slope = np.abs(j[-1] - j[0]) / np.abs(df[Index(Emin),0] - df[Index(Emax),0])
-        # line = slope * array + j(Emax)
-        BE_array = np.arange(0,np.abs(df[Index(Emin),0] - df[Index(Emax),0])+BEstep,step=BEstep)
-        return (slope * BE_array + (df[Index(Emax),1]))
-
-    ### Create unchanging j0 array with 0 subtraction
-    j0 = np.copy(j)
-
-    Bg = np.zeros(len(j))
-
-    k = (j0[0] - j0[-1]) / np.trapz(j0 - j0[-1])
-
-    Eflip = (df[Index(Emax):Index(Emin)+1,0])
     i = 0
+    for E in E0:
+        # Integrate from E to E_max
+        # Subset j and bg_in to go from (E, E_max)
+        j_int = j[:i]
+        bg_in_int = bg_in[:i]
 
-    for E in Eflip:
-            
-        h = np.arange(E,Emax+BEstep,step=BEstep)
-        print(h)
-        integrand = j[0:len(h)] - j0[-1]
-        print(integrand)
+        if i == 0:
+            bg_val = 0
+        else:
+            bg_val = kn * simpson((j_int - bg_in_int),dx=0.5)
 
-        Bg[-len(h)] = np.trapz(integrand)
-        # print(np.trapz(integrand))
-
+        bg_out[i] = bg_val
         i += 1
 
-    Bg = np.flip(np.copy(Bg))
-        
-    k = (j0[0] - j0[-1]) / np.trapz(j - j[-1])
-    j = (j0 - k*Bg + j0[-1])
+    bg_out += j_max
+    bg_out[0] = j_max
 
-    BgTemp = (k*Bg + j0[-1])
-    diff = -(BgTemp[0] + np.flip(BgTemp)[0])
-    # return np.flip(-BgTemp - diff)
-    return -BgTemp - diff
+    diff = j_min - bg_out[0]
 
-print(ShirleyBG(df, peak_centers[1]-8,peak_centers[1]+6))
+    return bg_out
+
+
+#------------------------------------------------------------------------------------------------
+#               LOOP FOR ITERATIVE BACKGROUND
+#------------------------------------------------------------------------------------------------
+
+# Given a peak location and 2 endpoints, return the background
+def iterative_shirley(pk, upperBEdist, lowerBEdist):
+
+    Emax = peak_centers[pk] + upperBEdist
+    Emin = peak_centers[pk] - lowerBEdist
+
+    E0 = np.copy(df[Index(Emax):Index(Emin)+1,0])
+    j0 = np.copy(df[Index(Emax):Index(Emin)+1,1])
+    j_max = j0[0]
+    j_min = j0[-1]
+
+    B0 = np.array([j_min]*len(j0))
+
+    n_iterations = 7
+
+    B = B0
+
+    for i in range(n_iterations):
+
+        # Get new value for k
+        k = calc_kn(j_min, j_max, j0, B)
+
+        # Get new background
+        # plt.plot(E0,B)
+        # plt.plot(E0,j0)
+        B = calc_bg(k, j0, E0, B)
+
+    return B
+
+#------------------------------------------------------------------------------------------------
+#               FUNCS. FOR AREA UNDER CURVE
+#------------------------------------------------------------------------------------------------
+
+# Given a peak location and 2 endpoints, calculate the area between the spectrum and background
+def area_btwn_spect(pk, upperBEdist, lowerBEdist):
+
+    # Get spectrum values
+    Emax = peak_centers[pk] + upperBEdist
+    Emin = peak_centers[pk] - lowerBEdist
+    j0 = np.copy(df[Index(Emax):Index(Emin)+1,1])
+
+    # Calculate background
+    B = iterative_shirley(pk, upperBEdist, lowerBEdist)
+
+    Area = simpson((j0 - B),dx=0.5)
+
+    return Area
+

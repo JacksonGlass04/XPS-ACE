@@ -9,11 +9,8 @@
 #### USER MANUAL -- HOW TO USE THIS SCRIPT FOR XPS ANALYSIS
 ##
 
-// Note: to be deleted/rewritten:
-// Basically, I'm planning to have this calculate the background region first, and that file will output a csv of all of the regions to subtract of background 
-// The user will generate these regions by running a python command which references this text file
-// The user can then check the background regions, and then manually edit them below
-// To calculate atomic % from this the user runs another python script, referncing the output csv of regions and this config file
+#### HOW TO CREATE THE APPROPRIATE csv FILE FOR ANALYSIS
+##
 
 #### SELECT DATA TO BE ANALYZED
 >>> EdgarEastSpectrum.csv
@@ -41,9 +38,10 @@
 
 #### SET CORRECTED CRSF VALUES (Obtained from Multipak)
 ## CRSF == 'Corrected Relative Sensitivity Factor', needed to obtain At%
+## You can obtain the CRSF values in multipak through the summary.txt table output
 ## Write CRSF values in the following format 'x, y, z'
 ## Where x, y, z and the CRSF values corresponding to the 1st, 2nd, and 3rd element listed above in the elements list
->>>
+>>> 87.775, 205.026, 279.795, 50.283, 76.549, 84.135, 96.962, 168.940, 228.568, 301.547, 495.706, 598.542 
 
 
 #### HOW TO RUN ERROR ANALYSIS
