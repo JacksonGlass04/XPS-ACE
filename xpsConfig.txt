@@ -4,22 +4,17 @@
 #### JACKSON GLASS,
 #### 2024,
 
-#### DO NOT EDIT ANY LINES CONTAINING '#' or any '>' characters
+#### DO NOT REMOVE ANY '>' characters
 
-#### USER MANUAL -- HOW TO USE THIS SCRIPT FOR XPS ANALYSIS
-##
-
-#### HOW TO CREATE THE APPROPRIATE csv FILE FOR ANALYSIS
-##
+## To see how to run this program, consult the Read Me
 
 #### SELECT DATA TO BE ANALYZED
->>> Filename.csv
+## In the following format, omitting quotation marks: 'Filename.csv'
+>>> EdgarEastSpectrum.csv
+
 
 #### ELEMENTS TO ANALYZE / PEAK CENTERS
-## Write in a comma separated list alternating element name and peak center (eV), i.e. 'Fe, 712.5, Mg, 91, O, 535'
-## You do not need to specify the atomic transition (e.g. you can write O instead of O1s)
-## Write your list of elements and peak centers on the following line:
->>> Fe, 712.5
+## Open the file "Data_Table.csv", and write the element/transition, peak center, and CRSF value for each transition, with one element per row
 
 
 #### HOW TO OUTPUT PLOTS OF REGION FOR BACKGROUND POINT SELECTION
@@ -29,22 +24,32 @@
 
 
 #### MANUALLY SET BACKGROUND REGION HERE
-## To manually set a region, include the following information 'Element_Name, Low_Or_High_Region, Starting_Energy, Ending_Energy'
-## Include the name of the element, identical to how you wrote it above,
-## Whether or not the region you are setting is in the low or high binding energy region (i.e. to the left or right of the peak),
-## And what the start and stop points are for the region, NOTE the step size of your XPS data, and use only values divisible by that step
->>>
+## To manually set a region, include the following information 'Transition_Name, Low_Or_High_Region, Starting_Energy, Ending_Energy'
+## Include the name of the transition, identical to how you wrote it above,
+## As an example, 'Fe2p, Low, 702.5, 706.5, Fe2p, High, 718.5, 722.5' would create a high and low custom region for the Fe2p transition 
+## NOTE the step size of your XPS data, and use only values divisible by that step size (i.e. 0.5eV for a survey)
+>>> Fe2p, Low, 702.5, 706.5, Fe2p, High, 718.5, 722.5
 
 
-#### SET CORRECTED CRSF VALUES (Obtained from Multipak)
-## CRSF == 'Corrected Relative Sensitivity Factor', needed to obtain At%
-## You can obtain the CRSF values in multipak through the summary.txt table output
-## Write CRSF values in the following format 'x, y, z'
-## Where x, y, z and the CRSF values corresponding to the 1st, 2nd, and 3rd element listed above in the elements list
->>> 598.542
+#### TO SAVE CUSTOMIZED REGIONS 
+## Run the following command
+>>> python Control.py -custom_region True
+
+
+#### IMPORTANT NOTE ON RELATIVE SENSITIVITY FACTORS -- PLEASE READ
+## Each XPS Setup has different Corrected Relative Sensitivity Factors (CRSF), which are needed to calculate atomic %
+## From your summary.txt output from Multipak, ensure that the CRSF values match those in Data_Table.csv
+## If you do not do this, the results will be incorrect!!
 
 
 #### HOW TO RUN ERROR ANALYSIS
 ## This can only be done after running Region.py, or setting all regions manually
 ## 
 >>> python Composition.py
+
+
+#### HOW TO DISPLAY YOUR RESULTS
+## You can create a plot of At% results of your XPS analysis
+## This program allows you to customize the filetype, and plot scale
+## To see options, run the following command, which will tell you how to run the program with desired input
+>>> python Display.py -h

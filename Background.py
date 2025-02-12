@@ -27,7 +27,7 @@ import os
 
 filename = Control.Return_Filename()
 
-df = pd.read_csv(filename,skiprows=4,header=None)
+df = pd.read_csv(filename,skiprows=4,header=None, error_bad_lines = False)
 df = df.apply(pd.to_numeric, errors='coerce')
 df = df.to_numpy()
 

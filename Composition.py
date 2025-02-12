@@ -26,7 +26,7 @@ import sys
 filename = Control.Return_Filename()
 
 # df = pd.read_csv(filename, skiprows=4, header=None)
-df = pd.read_csv(os.path.join(sys.path[0], filename), skiprows=4, header=None)
+df = pd.read_csv(os.path.join(sys.path[0], filename), skiprows=4, header=None, on_bad_lines='skip')
 df = df.apply(pd.to_numeric, errors='coerce')
 df = df.to_numpy()
 df = df.T
@@ -201,10 +201,10 @@ def CalculateErrorBars():
         MinComposition[i] = Element_Min_AUC / Normalization
 
     # Save results to a csv file
-    ACE_df = pd.DataFrame({'Element':elements,'Min':MinComposition, 'Max':MaxComposition})
+    ACE_df = pd.DataFrame({'Element':elements,'Min':100*MinComposition, 'Max':100*MaxComposition})
     ACE_df.to_csv('ACE.csv',index=False)
 
-    return MaxComposition, MinComposition
+    return 100*MaxComposition, 100*MinComposition
 
 #------------------------------------------------------------------------------------------------
 #               MAIN FUNCTION

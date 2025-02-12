@@ -14,19 +14,30 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import Control
-import os
-import sys
+import argparse
+
+ 
+parser = argparse.ArgumentParser()
+
+
+parser.add_argument("-fform", "--fileformat",
+                    default="png",
+                    help='Exports plot in other than default png format, such as svg, pdf, jpeg')
+
+parser.add_argument("-scale", "--plotscale",
+                    default="linear",
+                    help='Determines the scale of the plot, takes the arguments \'log\' or \'linear\'')
+
+args = parser.parse_args()
+
 
 #------------------------------------------------------------------------------------------------
 #               READING IN DATA
 #------------------------------------------------------------------------------------------------
 
 data = pd.read_csv("ACE.csv")
-data['Min'] = 100*data['Min']
-data['Max'] = 100*data['Max']
-
-filename = Control.Return_Filename()
+data['Min'] = data['Min']
+data['Max'] = data['Max']
 
 #------------------------------------------------------------------------------------------------
 #               PLOTTING DATA
@@ -37,8 +48,9 @@ plt.scatter(x,data['Min'],marker='_',color='black')
 plt.scatter(x,data['Max'],marker='_',color='black')
 plt.vlines(x,data['Min'],data['Max'],color='black')
 plt.xticks(np.arange(0,data.shape[0]),data['Element'])
-plt.title(filename[:-4])
+plt.yscale(args.plotscale)
+plt.title(f'Atomic%_{args.plotscale}')
 plt.ylabel('At %')
 plt.xlabel('Element')
-plt.savefig('ErrobarPlot.png',dpi=300)
+plt.savefig(f'ErrorbarPlot_{args.plotscale}.{args.fileformat}',dpi=300)
 plt.show()
