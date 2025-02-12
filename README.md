@@ -54,8 +54,6 @@ STEP 1: In Multipak, load your data, and select elements you wish to analyze.
 
 This program calculates the error in atomic composition as a function of the choice of background endpoints across the sample. To calculate the error, we first must find a method for isolating possible locations where background endpoints could be placed.
 
--Where could they be placed -- Derivatives
-
 A 'good' choice of background endpoint is subjective, but has some common characteristics. A good endpoint occurs near a flatter region, not on the slope of the peak, and generally this region should be a ways away from the inflection of the peak. To model this, we calculate the minima of a smoothed version of the peak, as well as the distance from the peak center to it's inflection (call it say, deltaE). We then generate a region which is symmetric about the distance between the smoothed minima and the nearest multiple of the distance deltaE from the peak. If there is no minima close to the peak, then the region is chosen between 3-5 deltaE.
 
 In the event that this region selection is not optimal, we allow the user to manually override with their own choice of background region.
@@ -75,7 +73,7 @@ To turn these sets of endpoints in to error bars, we must calculate the area bet
 
 
 
-## LIST OF DEPENDENCIES
+## LIST OF DEPENDENCIES / REQUIRED PACKAGES
 
 - numpy
 - matplotlib.pylot
