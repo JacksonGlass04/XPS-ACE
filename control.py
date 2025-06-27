@@ -106,8 +106,9 @@ def Write_Edited_Regions():
     print(Changes_list)
     StartingBE = np.array(Changes_list[2::4],dtype=float)
     EndingBE = np.array(Changes_list[3::4],dtype=float)
+    outdir = 'regions'
 
-    df = pd.read_csv(Return_Filename(), skiprows=4, header=None, on_bad_lines='skip')
+    df = pd.read_csv(os.path.join('input',Return_Filename()), skiprows=4, header=None, on_bad_lines='skip')
     df = df.apply(pd.to_numeric, errors='coerce')
     df = df.to_numpy()
     df = df.T
@@ -125,7 +126,7 @@ def Write_Edited_Regions():
         BE_list = np.arange(StartingBE[i],EndingBE[i]+BEstep,BEstep)
 
         # Write the list to the correct file
-        np.savetxt(f'./{Return_Filename()[:-4]}_Regions/{fname}',BE_list)
+        np.savetxt(f'{outdir}/{fname}',BE_list)
 
 if(args.CustomRegion):
 

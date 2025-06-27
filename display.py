@@ -38,7 +38,7 @@ outdir = 'output'
 #               READING IN DATA
 #------------------------------------------------------------------------------------------------
 
-data = pd.read_csv(f"{casename}_comp.csv")
+data = pd.read_csv(f"{outdir}/{casename}_comp.csv")
 data['Min'] = data['Min']
 data['Max'] = data['Max']
 
