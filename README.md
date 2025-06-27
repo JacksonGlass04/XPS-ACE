@@ -4,6 +4,10 @@ This program was written as part of the Virginia Initiative on Cosmic Origins (V
 
 This program aims to calculate error bars on the atomic composition of an xps sample, specifically the error which is introduced by changing the variable endpoints of the iterative Shirley background, which is commonly used in XPS analysis.
 
+## REQUIREMENTS
+
+If you are running XPS-ACE on Windows Subsystem For Linux, you may have to install qtwayland5 using `sudo apt install qtwayland5` and set `export QT_QPA_PLATFORM=xcb` in the linux terminal.
+
 
 ## EXPLANATION OF PROGRAMS AND FILES
 
@@ -22,7 +26,7 @@ This program aims to calculate error bars on the atomic composition of an xps sa
 
 
 ## HOW TO RUN THE ERROR ANALYSIS PROGRAM
-STEP 1: In Multipak, load your data, and select elements you wish to analyze.
+#### STEP 1: In Multipak, load your data, and select elements you wish to analyze.
 
 #### STEP 2: From multipak, export the spectrum counts, as well as corrected RSF values
 
@@ -33,17 +37,17 @@ STEP 1: In Multipak, load your data, and select elements you wish to analyze.
 
     - Follow instructions in xpsConfig.txt to set both the data to be analyzed, as well as the transitions and their peak centers
 
-#### STEP 4: Run Region.py from the console, i.e. >>> python Region.py
+#### STEP 4: Run Region.py from the console, i.e. >>> python regions.py
 
     - This will create and display chosen regions of 'acceptable' endpoints. 
     - If you wish to edit these regions, consult the xpsConfig.txt section on custom regions
 
-#### STEP 5: Run Composition.py from the console, i.e. >>> python Composition.py
+#### STEP 5: Run Composition.py from the console, i.e. >>> python composition.py
 
     - This will use the chosen regions to calculate atomic percent error bars
-    - The results will be printed to the terminal, and saved as a csv in ACE.csv
+    - The results will be printed to the terminal, and saved as a csv in output.csv
 
-#### STEP 6: (Optional) To create a plot of the errorbars, run >>> python Display.py
+#### STEP 6: (Optional) To create a plot of the errorbars, run >>> python display.py
 
     - This plot can be log or linear, with user-chosen image extension
     - Run 'python Display.py -h' to see all options

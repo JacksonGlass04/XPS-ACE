@@ -10,11 +10,11 @@
 
 #### SELECT DATA TO BE ANALYZED
 ## In the following format, omitting quotation marks: 'Filename.csv'
->>> EdgarEastSpectrum.csv
+>>> He_Old_TFS.csv
 
 
 #### ELEMENTS TO ANALYZE / PEAK CENTERS
-## Open the file "Data_Table.csv", and write the element/transition, peak center, and CRSF value for each transition, with one element per row
+## Open the file "enstatite_demo.table" with notepad, and write the element/transition, peak center, and CRSF value for each transition, with one element per row
 
 
 #### HOW TO OUTPUT PLOTS OF REGION FOR BACKGROUND POINT SELECTION
@@ -26,14 +26,14 @@
 #### MANUALLY SET BACKGROUND REGION HERE
 ## To manually set a region, include the following information 'Transition_Name, Low_Or_High_Region, Starting_Energy, Ending_Energy'
 ## Include the name of the transition, identical to how you wrote it above,
-## As an example, 'Fe2p, Low, 702.5, 706.5, Fe2p, High, 718.5, 722.5' would create a high and low custom region for the Fe2p transition 
-## NOTE the step size of your XPS data, and use only values divisible by that step size (i.e. 0.5eV for a survey)
->>> Fe2p, Low, 702.5, 706.5, Fe2p, High, 718.5, 722.5
+## NOTE: only use values divisible by the step size of your spectrum
+### Fe2p3, Low, 701.2, 713.2, Fe2p3, High, 718.2, 722.2
+>>> Ca2p, Low, 339.2, 341.6, Fe2p3, High, 357.8, 359.3
 
 
 #### TO SAVE CUSTOMIZED REGIONS 
 ## Run the following command
->>> python Control.py -custom_region True
+>>> python control.py -cr
 
 
 #### IMPORTANT NOTE ON RELATIVE SENSITIVITY FACTORS -- PLEASE READ

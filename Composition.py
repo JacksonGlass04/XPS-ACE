@@ -14,19 +14,22 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import Control
-import Background
+import control
+import background
 import os
 import sys
 
 #------------------------------------------------------------------------------------------------
-#               GLOBAL CONSTANTS TAKEN FROM Control.py
+#               GLOBAL CONSTANTS TAKEN FROM control.py
 #------------------------------------------------------------------------------------------------
 
-filename = Control.Return_Filename()
+
+filename = control.Return_Filename()
+casename = control.Return_Casename()
+outdir = 'output'
 
 # df = pd.read_csv(filename, skiprows=4, header=None)
-df = pd.read_csv(os.path.join(sys.path[0], filename), skiprows=4, header=None, on_bad_lines='skip')
+df = pd.read_csv(os.path.join("input", filename), skiprows=4, header=None, on_bad_lines='skip')
 df = df.apply(pd.to_numeric, errors='coerce')
 df = df.to_numpy()
 df = df.T
@@ -47,8 +50,8 @@ def Index(val):
     ind = np.where(df[0] == val)[0][0]
     return int(ind)
 
-peak_centers = Control.Return_Peak_Centers()
-elements = Control.Return_Elements()
+peak_centers = control.Return_Peak_Centers()
+elements = control.Return_Elements()
 
 #------------------------------------------------------------------------------------------------
 #               IMPORT LEFT AND RIGHT REGION
@@ -57,10 +60,10 @@ elements = Control.Return_Elements()
 def Import_Region_Data(pk):
 
     current_directory = os.getcwd()
-    directory_reg = os.path.join(current_directory, f'{filename[:-4]}_Regions')
+    reg_dir = os.path.join(current_directory, 'regions')
 
-    L_Reg = np.loadtxt(f'{directory_reg}/{filename[:-4]}_{elements[pk].strip()}_LowBE_Region')
-    R_Reg = np.loadtxt(f'{directory_reg}/{filename[:-4]}_{elements[pk].strip()}_HighBE_Region')
+    L_Reg = np.loadtxt(f'{reg_dir}/{filename[:-4]}_{elements[pk].strip()}_LowBE_Region')
+    R_Reg = np.loadtxt(f'{reg_dir}/{filename[:-4]}_{elements[pk].strip()}_HighBE_Region')
 
     return L_Reg, R_Reg
 
@@ -86,7 +89,7 @@ def Calc_Area_Array(pk,low_reg,high_reg):
 
             upperBEdist = Emax - peak_centers[pk]
             lowerBEdist = peak_centers[pk] - Emin
-            AUC = Background.area_btwn_spect(pk, upperBEdist, lowerBEdist)
+            AUC = background.area_btwn_spect(df, pk, upperBEdist, lowerBEdist)
 
             AUC_array[m] = AUC
             m += 1
@@ -97,6 +100,8 @@ def Calc_Area_Array(pk,low_reg,high_reg):
     return AUC_array
 
 Calc_Area_Array(0,L_Reg,R_Reg)
+
+
 
 #------------------------------------------------------------------------------------------------
 #               SUBSET 1 SIGMA REGION FROM AREA DISTRIBUTION
@@ -165,7 +170,7 @@ def CalculateErrorBars():
     # print(AUC_df)
 
     ## Import CRSF
-    CRSF = Control.Return_CRSF()
+    CRSF = control.Return_CRSF()
     CRSF = np.array(CRSF,dtype=float)
 
     MaxComposition = np.zeros(len(elements))
@@ -200,9 +205,9 @@ def CalculateErrorBars():
         Normalization = Element_Min_AUC + np.sum(Other_Elements_Max)
         MinComposition[i] = Element_Min_AUC / Normalization
 
-    # Save results to a csv file
+    # Save results to a csv file with four significant digits
     ACE_df = pd.DataFrame({'Element':elements,'Min':100*MinComposition, 'Max':100*MaxComposition})
-    ACE_df.to_csv('ACE.csv',index=False)
+    ACE_df.to_csv(os.path.join(outdir, f'{casename}_comp.csv'),index=False,float_format="%.4g")
 
     return 100*MaxComposition, 100*MinComposition
 
