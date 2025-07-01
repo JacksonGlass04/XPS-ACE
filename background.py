@@ -100,11 +100,12 @@ def iterative_shirley(df, pk, upperBEdist, lowerBEdist):
     Emax = peak_centers[pk] + upperBEdist
     Emin = peak_centers[pk] - lowerBEdist
 
+
     id_max = control.NearestIdx(df[0], Emax)
     id_min = control.NearestIdx(df[0], Emin)
 
-    E0 = np.copy(df[0, id_min:id_max+1])
-    j0 = np.copy(df[1, id_min:id_max+1])
+    E0 = np.copy(df[0, id_min+1:id_max])
+    j0 = np.copy(df[1, id_min+1:id_max])
 
 
     j_max = j0[-1]
@@ -134,7 +135,6 @@ def iterative_shirley(df, pk, upperBEdist, lowerBEdist):
 
 # Given a peak location and 2 endpoints, calculate the area between the spectrum and background
 def area_btwn_spect(df, pk, upperBEdist, lowerBEdist):
-
     # Get spectrum values
 
     Emax = peak_centers[pk] + upperBEdist
@@ -144,7 +144,7 @@ def area_btwn_spect(df, pk, upperBEdist, lowerBEdist):
     id_max = control.NearestIdx(df[0], Emax)
     id_min = control.NearestIdx(df[0], Emin)
 
-    j0 = np.copy(df[1, id_min:id_max+1])
+    j0 = np.copy(df[1, id_min+1:id_max])
 
     # Calculate background
     B = iterative_shirley(df, pk, upperBEdist, lowerBEdist)

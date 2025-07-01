@@ -1,3 +1,4 @@
+# XPS Atomic Composition Error (XPS-ACE)
 ## BACKGROUND INFORMATION ON THIS PROGRAM
 
 This program was written as part of the Virginia Initiative on Cosmic Origins (VICO) Summer 2024 program, by Jackson Glass (contact at jacksoncglass@gmail.com), for the Laboratory for Astrophysics and Surface Physics at UVA as part of the OSIRIS-REx analysis. 
@@ -13,15 +14,15 @@ If you are running XPS-ACE on Windows Subsystem For Linux, you may have to insta
 
 - xpsConfig.txt -- This is the config file from which the user sets up their analysis preferences and provides data
 
-- Background.py -- A program for calculating the iterative shirley background of a sample
+- main.py -- Finding appropriate endpoint regions for each element being analyzed
 
-- Control.py -- A program for reading in data and distributing it among other programs
+- control.py -- reads data, distributing it among other programs, and is used to manually update regions found by main.py
 
-- Region.py -- A program for finding appropriate endpoint regions for each element being analyzed
+- background.py -- calculates the iterative shirley background of a sample
 
-- Composition.py -- A program for calculating the composition error bars based on all sets of endpoints
+- composition.py -- calculates the composition error bars based on all sets of endpoints
 
-- Display.py -- From the calculated error bars, this program creates a plot of each element's error bar
+- display.py -- From the calculated error bars, this program creates a plot of each element's error bar
 
 
 
@@ -37,15 +38,20 @@ If you are running XPS-ACE on Windows Subsystem For Linux, you may have to insta
 
     - Follow instructions in xpsConfig.txt to set both the data to be analyzed, as well as the transitions and their peak centers
 
-#### STEP 4: Run Region.py from the console, i.e. >>> python regions.py
+#### STEP 4: Run main.py from the console >>> python main.py
 
-    - This will create and display chosen regions of 'acceptable' endpoints. 
-    - If you wish to edit these regions, consult the xpsConfig.txt section on custom regions
+    - Creates and displays chosen regions of 'acceptable' endpoints.
+    - If you agree with the regions of integration endpoints, procede with STEP 5
 
-#### STEP 5: Run Composition.py from the console, i.e. >>> python composition.py
+#### STEP 4.5: (Optional) Update the integration areas
 
-    - This will use the chosen regions to calculate atomic percent error bars
-    - The results will be printed to the terminal, and saved as a csv in output.csv
+    - If you wish to edit the background region, manually set a background region in the xpsConfig.txt and then update the region file with python control.py -cr
+    - Repeat this process for each element region you wish to update  
+
+#### STEP 5: Run composition.py from the console, i.e. >>> python composition.py
+
+    - This will use the chosen regions to calculate the minimum and maximum at% composition
+    - The results will be printed to the terminal, and saved as a csv in output/FILENAME_comp.csv
 
 #### STEP 6: (Optional) To create a plot of the errorbars, run >>> python display.py
 
@@ -62,7 +68,7 @@ A 'good' choice of background endpoint is subjective, but has some common charac
 
 In the event that this region selection is not optimal, we allow the user to manually override with their own choice of background region.
 
-To turn these sets of endpoints in to error bars, we must calculate the area between the spectrum and background for each choice of background, saving the area to an array. We take the 1-sigma region of this area distribution for each element, and compute the extremal atomic percent with the remaining values. The minimum-% error bar is found by minimizing the area of element X, while maximizing all other element areas. A similar process is done for the maximum-% error bar.
+To turn these sets of endpoints in to error bars, we must calculate the area between the spectrum and background for each choice of background, saving the area to an array. We take the 1-sigma region of this area distribution for each element and compute the extremal atomic percent with the remaining values. The minimum-% error bar is found by minimizing the area of element X, while maximizing all other element areas. A similar process is done for the maximum-% error bar.
 
 
 ## TROUBLE SHOOTING GUIDE / POTENTIAL ERRORS

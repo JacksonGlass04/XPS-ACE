@@ -57,11 +57,11 @@ def smooth_signal(data):
 
 def Minima(pk):
     # Distance from the peak, in terms of Binding Energy
-    up = 10
+    deV = 10
 
     # Smooth the region of interest
-    id_min = control.NearestIdx(df[0], peak_centers[pk]-up)
-    id_max= control.NearestIdx(df[0], peak_centers[pk]+up)
+    id_min = control.NearestIdx(df[0], peak_centers[pk]-deV)
+    id_max= control.NearestIdx(df[0], peak_centers[pk]+deV)
 
     x = df[0,id_min:id_max]
     j = df[1,id_min:id_max]
@@ -106,9 +106,9 @@ def Minima(pk):
 
 def HWHM(pk):
     # We only find the HWHM towards the low BE side, and use this for both sides
-    up = 8
+    deV_low = 8
 
-    id_min = control.NearestIdx(df[0], peak_centers[pk]-up)
+    id_min = control.NearestIdx(df[0], peak_centers[pk]-deV_low)
     id_max= control.NearestIdx(df[0], peak_centers[pk])
 
     x = df[0,id_min:control.NearestIdx(df[0], id_max)]
@@ -371,8 +371,8 @@ def Plot_Region(pk):
 
     plt.savefig(f'{outdir}/{elements[pk].strip()}_{filename[:-4]}_Region.png')
 
-    np.savetxt(f'{outdir}/{filename[:-4]}_{elements[pk].strip()}_LowBE_Region',L_Reg)
-    np.savetxt(f'{outdir}/{filename[:-4]}_{elements[pk].strip()}_HighBE_Region',R_Reg)
+    np.savetxt(f'{outdir}/{filename[:-4]}_{elements[pk].strip()}_LowBE_Region',L_Reg, fmt='%.1f')
+    np.savetxt(f'{outdir}/{filename[:-4]}_{elements[pk].strip()}_HighBE_Region',R_Reg, fmt='%.1f')
     
     plt.tight_layout()
 

@@ -10,7 +10,7 @@
 
 #### SELECT DATA TO BE ANALYZED
 ## In the following format, omitting quotation marks: 'Filename.csv'
->>> enstatite_demo.csv
+>>> sulfide_test.csv
 
 
 #### ELEMENTS TO ANALYZE / PEAK CENTERS
@@ -27,8 +27,9 @@
 ## To manually set a region, include the following information 'Transition_Name, Low_Or_High_Region, Starting_Energy, Ending_Energy'
 ## Include the name of the transition, identical to how you wrote it in "Filename.table",
 ## NOTE: only use values divisible by the step size of your spectrum
->>> Fe2p3, Low, 701.2, 713.2, Fe2p3, High, 718.2, 722.2
-### Ca2p, Low, 339.2, 341.6, Fe2p3, High, 357.8, 359.3
+### Fe2p3, Low, 701.2, 713.2, Fe2p3, High, 718.2, 722.2
+>>> Ca2p, Low, 339.0, 341.0, Ca2p, High, 350.0, 352.0
+### O1s, Low, 521, 524, O1s, High, 534, 536
 
 
 #### TO SAVE CUSTOMIZED REGIONS 
