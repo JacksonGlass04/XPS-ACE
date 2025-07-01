@@ -11,11 +11,12 @@
 #               IMPORT STATEMENTS
 #------------------------------------------------------------------------------------------------
 
+import os
+import argparse
+import control
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import argparse
-
  
 parser = argparse.ArgumentParser()
 
@@ -30,12 +31,14 @@ parser.add_argument("-scale", "--plotscale",
 
 args = parser.parse_args()
 
+casename = control.Return_Casename()
+outdir = 'output'
 
 #------------------------------------------------------------------------------------------------
 #               READING IN DATA
 #------------------------------------------------------------------------------------------------
 
-data = pd.read_csv("ACE.csv")
+data = pd.read_csv(f"{outdir}/{casename}_comp.csv")
 data['Min'] = data['Min']
 data['Max'] = data['Max']
 
@@ -49,8 +52,8 @@ plt.scatter(x,data['Max'],marker='_',color='black')
 plt.vlines(x,data['Min'],data['Max'],color='black')
 plt.xticks(np.arange(0,data.shape[0]),data['Element'])
 plt.yscale(args.plotscale)
-plt.title(f'Atomic%_{args.plotscale}')
+plt.title(f'Atomic% {args.plotscale}')
 plt.ylabel('At %')
 plt.xlabel('Element')
-plt.savefig(f'ErrorbarPlot_{args.plotscale}.{args.fileformat}',dpi=300)
+plt.savefig(os.path.join(outdir,f'{casename}_error_{args.plotscale}.{args.fileformat}'),dpi=300)
 plt.show()

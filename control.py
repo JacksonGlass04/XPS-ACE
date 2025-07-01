@@ -11,14 +11,16 @@
 #               IMPORT STATEMENTS
 #------------------------------------------------------------------------------------------------
 
+import os 
+import sys
+import math
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from scipy.signal import savgol_filter
 from scipy.signal import argrelmin, argrelmax
-import os 
-import sys
-import argparse
+
 
 #------------------------------------------------------------------------------------------------
 #               READ IN CONFIG TEXT FILE
@@ -27,9 +29,9 @@ import argparse
 parser = argparse.ArgumentParser()
 
 
-parser.add_argument("-custom_region", "--CustomRegion",
-                    default=False,
-                    help='This flag allows the user to set custom XPS regions using xpsConfig.txt, use \'-custom_region True\' to save regions')
+parser.add_argument("-cr", "--CustomRegion",
+                    action="store_true",
+                    help='This flag allows the user to set custom XPS regions defined in xpsConfig.txt')
 
 args = parser.parse_args()
 
@@ -40,9 +42,11 @@ data_lines = []
 
 for line in lines:
     if ">>>" in line:
-        data_lines.append(line[3:])
+        data_lines.append(line[3:].replace('\n', '')) # the replacement prevents line ending issues
 
-Input_df = pd.read_csv("Data_Table.csv")
+casename = data_lines[0].strip().split('.')[0]
+
+Input_df = pd.read_csv(os.path.join("input", f"{casename}.table"), comment='#')
 Input_df = Input_df.to_numpy()
 
 #------------------------------------------------------------------------------------------------
@@ -69,6 +73,8 @@ Input_df = Input_df.to_numpy()
 def Return_Filename():
     return data_lines[0].strip()
 
+def Return_Casename():
+    return data_lines[0].strip().split('.')[0]
 
 # # Create elements list
 # def Return_Elements():
@@ -94,13 +100,15 @@ def Return_CRSF():
 def Write_Edited_Regions():
 
     # If we wish the change the region, we overwrite the file 'Filename_Transition_Low/HighBE_Region'
-    Changes_list = data_lines[3].replace(" ", "").replace("\n", "").split(',')
+    Changes_list = data_lines[2].replace(" ", "").replace("\n", "").split(',')
     Transitions = Changes_list[::4]
     LowHigh = Changes_list[1::4]
+    print(Changes_list)
     StartingBE = np.array(Changes_list[2::4],dtype=float)
     EndingBE = np.array(Changes_list[3::4],dtype=float)
+    outdir = 'regions'
 
-    df = pd.read_csv(Return_Filename(), skiprows=4, header=None, error_bad_lines = False)
+    df = pd.read_csv(os.path.join('input',Return_Filename()), skiprows=4, header=None, on_bad_lines='skip')
     df = df.apply(pd.to_numeric, errors='coerce')
     df = df.to_numpy()
     df = df.T
@@ -118,8 +126,16 @@ def Write_Edited_Regions():
         BE_list = np.arange(StartingBE[i],EndingBE[i]+BEstep,BEstep)
 
         # Write the list to the correct file
-        np.savetxt(f'./{Return_Filename()[:-4]}_Regions/{fname}',BE_list)
+        np.savetxt(f'{outdir}/{fname}',BE_list)
 
 if(args.CustomRegion):
 
     Write_Edited_Regions()
+
+# Indexing function
+def NearestIdx(array,value):
+    idx = np.searchsorted(array, value, side="left")
+    if idx > 0 and (idx == len(array) or math.fabs(value - array[idx-1]) < math.fabs(value - array[idx])):
+        return idx-1
+    else:
+        return idx

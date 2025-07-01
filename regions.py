@@ -11,21 +11,23 @@
 #               IMPORT STATEMENTS
 #------------------------------------------------------------------------------------------------
 
+import os
+import control
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from scipy.signal import savgol_filter
 from scipy.signal import argrelmin, argrelmax
-import Control
-import os
+
 
 #------------------------------------------------------------------------------------------------
-#               GLOBAL CONSTANTS TAKEN FROM Control.py
+#               GLOBAL CONSTANTS TAKEN FROM control.py
 #------------------------------------------------------------------------------------------------
 
-filename = Control.Return_Filename()
+filename = control.Return_Filename()
+outdir = 'regions'
 
-df = pd.read_csv(filename,skiprows=4,header=None, on_bad_lines='skip')
+df = pd.read_csv(os.path.join("input", filename),skiprows=4,header=None,on_bad_lines='skip')
 df = df.apply(pd.to_numeric, errors='coerce')
 df = df.to_numpy()
 df = df.T
@@ -41,13 +43,8 @@ lenBE = len(df[0])
 # Step size
 BEstep = np.abs(np.round(df[0,0] - df[0,1],3))
 
-# Indexing function
-def Index(val):
-    ind = np.where(df[0] == val)[0][0]
-    return int(ind)
-
-peak_centers = Control.Return_Peak_Centers()
-elements = Control.Return_Elements()
+peak_centers = control.Return_Peak_Centers()
+elements = control.Return_Elements()
 
 #------------------------------------------------------------------------------------------------
 #               SMOOTHING/MINIMA
@@ -63,8 +60,12 @@ def Minima(pk):
     up = 10
 
     # Smooth the region of interest
-    x = df[0,Index(peak_centers[pk]-up):Index(peak_centers[pk]+up)]
-    j = df[1,Index(peak_centers[pk]-up):Index(peak_centers[pk]+up)]
+    id_min = control.NearestIdx(df[0], peak_centers[pk]-up)
+    id_max= control.NearestIdx(df[0], peak_centers[pk]+up)
+
+    x = df[0,id_min:id_max]
+    j = df[1,id_min:id_max]
+    
     j_smooth = smooth_signal(j)
 
     # Split in to right data and exclude peak +-2eV
@@ -106,8 +107,12 @@ def Minima(pk):
 def HWHM(pk):
     # We only find the HWHM towards the low BE side, and use this for both sides
     up = 8
-    x = df[0,Index(peak_centers[pk]-up):Index(peak_centers[pk])]
-    j = df[1,Index(peak_centers[pk]-up):Index(peak_centers[pk])]
+
+    id_min = control.NearestIdx(df[0], peak_centers[pk]-up)
+    id_max= control.NearestIdx(df[0], peak_centers[pk])
+
+    x = df[0,id_min:control.NearestIdx(df[0], id_max)]
+    j = df[1,id_min:control.NearestIdx(df[1], id_max)]
 
     #### First find the peak maximum, subtract off the minima
     #       Get the minima from the above function
@@ -137,8 +142,13 @@ def DerivativePoints(pk):
     up = 10
 
     # Smooth the region of interest
-    x = df[0,Index(peak_centers[pk]-up):Index(peak_centers[pk]+up)]
-    j = df[1,Index(peak_centers[pk]-up):Index(peak_centers[pk]+up)]
+    id_min = control.NearestIdx(df[0], peak_centers[pk]-up)
+    id_max= control.NearestIdx(df[0], peak_centers[pk]+up)
+
+    x = df[0,id_min:id_max]
+    j = df[1,id_min:id_max]
+
+    
     j_smooth = smooth_signal(j)
 
     # Calculate the derivative of the smoothed function
@@ -334,8 +344,11 @@ def Plot_Region(pk):
 
     up = 10
 
-    x = df[0,Index(peak_centers[pk]-up):Index(peak_centers[pk]+up)]
-    j = df[1,Index(peak_centers[pk]-up):Index(peak_centers[pk]+up)]
+    id_min = control.NearestIdx(df[0], peak_centers[pk]-up)
+    id_max= control.NearestIdx(df[0], peak_centers[pk]+up)
+
+    x = df[0,id_min:id_max]
+    j = df[1,id_min:id_max]
 
     plt.title(f'{elements[pk]} - {filename[:-4]} - Step = {BEstep}')
     plt.xlabel('Binding Energy')
@@ -350,30 +363,26 @@ def Plot_Region(pk):
     bottom, top = plt.ylim()
     y_max = 0.8*(top-bottom)+bottom
 
-    plt.text(L_Reg[0], y_max, f'{L_Reg[0]}',fontsize=14,ha='right',rotation='vertical')
-    plt.text(L_Reg[-1], y_max, f'{L_Reg[-1]}',fontsize=14,rotation='vertical')
+    plt.text(L_Reg[0], y_max, f'{L_Reg[0]:.2f}',fontsize=14,ha='right',rotation='vertical')
+    plt.text(L_Reg[-1], y_max, f'{L_Reg[-1]:.2f}',fontsize=14,rotation='vertical')
 
-    plt.text(R_Reg[0], y_max, f'{R_Reg[0]}',fontsize=14,ha='right',rotation='vertical')
-    plt.text(R_Reg[-1], y_max, f'{R_Reg[-1]}',fontsize=14,rotation='vertical')
+    plt.text(R_Reg[0], y_max, f'{R_Reg[0]:.2f}',fontsize=14,ha='right',rotation='vertical')
+    plt.text(R_Reg[-1], y_max, f'{R_Reg[-1]:.2f}',fontsize=14,rotation='vertical')
 
-    plt.savefig(f'{directory}/{elements[pk].strip()}_{filename[:-4]}_Region.png')
+    plt.savefig(f'{outdir}/{elements[pk].strip()}_{filename[:-4]}_Region.png')
 
-    np.savetxt(f'{directory_reg}/{filename[:-4]}_{elements[pk].strip()}_LowBE_Region',L_Reg)
-    np.savetxt(f'{directory_reg}/{filename[:-4]}_{elements[pk].strip()}_HighBE_Region',R_Reg)
+    np.savetxt(f'{outdir}/{filename[:-4]}_{elements[pk].strip()}_LowBE_Region',L_Reg)
+    np.savetxt(f'{outdir}/{filename[:-4]}_{elements[pk].strip()}_HighBE_Region',R_Reg)
     
     plt.tight_layout()
 
     plt.show()
 
 current_directory = os.getcwd()
-directory = os.path.join(current_directory, f'{filename[:-4]}_Plots')
-if not os.path.exists(directory):
-    os.makedirs(directory)
-
-current_directory = os.getcwd()
-directory_reg = os.path.join(current_directory, f'{filename[:-4]}_Regions')
-if not os.path.exists(directory_reg):
-    os.makedirs(directory_reg)
+for folder in ['regions', 'output']:
+    directory = os.path.join(current_directory, folder)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
 def Main():
 
@@ -381,3 +390,4 @@ def Main():
         Plot_Region(i)
 
 Main()
+

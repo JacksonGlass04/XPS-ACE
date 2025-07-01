@@ -18,35 +18,35 @@ import pandas as pd
 from scipy.signal import savgol_filter
 from scipy.signal import argrelmin, argrelmax
 from scipy.integrate import simpson
-import Control
+import control
 import os
 
 #------------------------------------------------------------------------------------------------
-#               GLOBAL CONSTANTS TAKEN FROM Control.py
+#               GLOBAL CONSTANTS TAKEN FROM control.py
 #------------------------------------------------------------------------------------------------
 
-filename = Control.Return_Filename()
+#filename = control.Return_Filename()
+#
+#df = pd.read_csv(filename,skiprows=4,header=None, on_bad_lines='skip')
+#df = df.apply(pd.to_numeric, errors='coerce')
+#df = df.to_numpy()
+#
+#df = df.T
+#
+#df[0] = np.flip(df[0])
+#df[1] = np.flip(df[1])
+#
+## Max value
+#maxBE = max(df[0])
+## Min value
+#minBE = min(df[0])
+## Length of list
+#lenBE = len(df[0])
+## Step size
+#BEstep = np.abs(np.round(df[0,0] - df[0,1],3))
 
-df = pd.read_csv(filename,skiprows=4,header=None, error_bad_lines = False)
-df = df.apply(pd.to_numeric, errors='coerce')
-df = df.to_numpy()
-
-# Max value
-maxBE = max(df[0])
-# Min value
-minBE = min(df[0])
-# Length of list
-lenBE = len(df[0])
-# Step size
-BEstep = np.abs(np.round(df[0,0] - df[0,1],3))
-
-# Indexing function
-def Index(val):
-    ind = np.where(df[:,0] == val)[0][0]
-    return int(ind)
-
-peak_centers = Control.Return_Peak_Centers()
-elements = Control.Return_Elements()
+peak_centers = control.Return_Peak_Centers()
+elements = control.Return_Elements()
 
 #------------------------------------------------------------------------------------------------
 #               FUNCTIONS TO CALC k_n and B_n(E)
@@ -95,15 +95,20 @@ def calc_bg(kn, j, E0, bg_in):
 #------------------------------------------------------------------------------------------------
 
 # Given a peak location and 2 endpoints, return the background
-def iterative_shirley(pk, upperBEdist, lowerBEdist):
+def iterative_shirley(df, pk, upperBEdist, lowerBEdist):
 
     Emax = peak_centers[pk] + upperBEdist
     Emin = peak_centers[pk] - lowerBEdist
 
-    E0 = np.copy(df[Index(Emax):Index(Emin)+1,0])
-    j0 = np.copy(df[Index(Emax):Index(Emin)+1,1])
-    j_max = j0[0]
-    j_min = j0[-1]
+    id_max = control.NearestIdx(df[0], Emax)
+    id_min = control.NearestIdx(df[0], Emin)
+
+    E0 = np.copy(df[0, id_min:id_max+1])
+    j0 = np.copy(df[1, id_min:id_max+1])
+
+
+    j_max = j0[-1]
+    j_min = j0[0]
 
     B0 = np.array([j_min]*len(j0))
 
@@ -128,15 +133,21 @@ def iterative_shirley(pk, upperBEdist, lowerBEdist):
 #------------------------------------------------------------------------------------------------
 
 # Given a peak location and 2 endpoints, calculate the area between the spectrum and background
-def area_btwn_spect(pk, upperBEdist, lowerBEdist):
+def area_btwn_spect(df, pk, upperBEdist, lowerBEdist):
 
     # Get spectrum values
+
     Emax = peak_centers[pk] + upperBEdist
     Emin = peak_centers[pk] - lowerBEdist
-    j0 = np.copy(df[Index(Emax):Index(Emin)+1,1])
+
+
+    id_max = control.NearestIdx(df[0], Emax)
+    id_min = control.NearestIdx(df[0], Emin)
+
+    j0 = np.copy(df[1, id_min:id_max+1])
 
     # Calculate background
-    B = iterative_shirley(pk, upperBEdist, lowerBEdist)
+    B = iterative_shirley(df, pk, upperBEdist, lowerBEdist)
 
     Area = simpson((j0 - B),dx=0.5)
 
