@@ -28,8 +28,9 @@
 ## Include the name of the transition, identical to how you wrote it in "Filename.table",
 ## NOTE: only use values divisible by the step size of your spectrum
 ### Fe2p3, Low, 701.2, 713.2, Fe2p3, High, 718.2, 722.2
->>> Ca2p, Low, 340.0, 341.0, Ca2p, High, 349.6, 351.0
+### Ca2p, Low, 340.0, 341.0, Ca2p, High, 349.6, 351.0
 ### O1s, Low, 521, 524, O1s, High, 534, 536
+>>> S2s, Low, 215, 216, S2s, High, 227, 228
 ### S2p, Low, 154, 156, S2p, High, 163, 165
 
 
