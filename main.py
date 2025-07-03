@@ -57,7 +57,7 @@ def smooth_signal(data):
 
 def Minima(pk):
     # Distance from the peak, in terms of Binding Energy
-    deV = 10
+    deV = 12
 
     # Smooth the region of interest
     id_min = control.NearestIdx(df[0], peak_centers[pk]-deV)
